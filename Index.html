@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecOps // Prywatne Testy Penetracyjne i Audyty</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #080c14;
+            --card-bg: #101726;
+            --border-color: #1e293b;
+            --neon-blue: #00f0ff;
+            --neon-green: #00ff88;
+            --neon-purple: #9d00ff;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        code, .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* HEADER */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(8, 12, 20, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 5%;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--neon-blue);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            color: var(--neon-green);
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--neon-blue);
+        }
+
+        .cart-btn {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            position: relative;
+            touch-action: manipulation;
+        }
+
+        .cart-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .cart-badge {
+            background: var(--neon-green);
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 10rem 5% 5rem;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(90deg, #fff, var(--neon-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin-bottom: 2.5rem;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.9rem 2rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: var(--neon-blue);
+            color: #000;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #00c2cc;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        /* CONTAINER SECTIONS */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 5%;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .section-title span {
+            color: var(--neon-blue);
+        }
+
+        /* PACKAGES */
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .package-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+        }
+
+        .package-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-blue);
+        }
+
+        .package-card.featured {
+            border-color: var(--neon-green);
+        }
+
+        .package-card.featured::before {
+            content: 'NAJWYŻSZA SKUTECZNOŚĆ';
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--neon-green);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .package-header h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .package-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .price {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--neon-blue);
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .features-list li {
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+        }
+
+        .features-list li i {
+            color: var(--neon-green);
+        }
+
+        /* CONFIGURATOR */
+        .configurator-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 3rem;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+        }
+
+        @media (max-width: 900px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .config-section {
+            margin-bottom: 2rem;
+        }
+
+        .config-section label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .config-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            position: relative;
+            z-index: 5;
+        }
+
+        .option-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.9rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .option-btn.active {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .summary-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .summary-total {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--neon-green);
+            margin: 1.5rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* CART DRAWER */
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 420px;
+            height: 100%;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            z-index: 2000;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        .cart-drawer.open {
+            right: 0;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-cart {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .cart-items {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .remove-item {
+            color: #ff4757;
+            background: none;
+            border: none;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        /* CHECKOUT MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            padding: 2.5rem;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.8rem;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--neon-blue);
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .payment-card.active {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 136, 0.05);
+            color: var(--neon-green);
+        }
+
+        .crypto-box {
+            background: var(--bg-color);
+            border: 1px dashed var(--neon-green);
+            padding: 1.2rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 5%;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <a href="#" class="logo"><i class="fa-solid fa-shield-halved"></i>SECOPS<span>.IO</span></a>
+        <nav>
+            <a href="#pakiety">Pakiety</a>
+            <a href="#konfigurator">Konfigurator</a>
+            <a href="#bezpieczenstwo">Poufność</a>
+        </nav>
+        <button class="cart-btn" onclick="toggleCart()">
+            <i class="fa-solid fa-cart-shopping"></i> Koszyk
+            <span class="cart-badge" id="cartCount">0</span>
+        </button>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <h1>Prywatne Testy Penetracyjne & Audyty Bezpieczeństwa</h1>
+        <p>Sprawdź odporność swojej aplikacji, serwera lub sieci na ataki (rejon: Pruszków i Warszawa). Pełna poufność dla osób prywatnych, profesjonalne raporty i płatności PayPal lub Monero (XMR).</p>
+        <div class="cta-group">
+            <a href="#konfigurator" class="btn btn-primary"><i class="fa-solid fa-sliders"></i> Skonfiguruj Test</a>
+            <a href="#pakiety" class="btn btn-outline">Zobacz Pakiety</a>
+        </div>
+    </section>
+
+    <!-- PACKAGES SECTION -->
+    <section class="container" id="pakiety">
+        <h2 class="section-title">Gotowe <span>Pakiety Usług</span></h2>
+        <div class="packages-grid">
+            <!-- Pakiet 1 -->
+            <div class="package-card">
+                <div class="package-header">
+                    <h3>Audyt Podstawowy (Pruszków/Warszawa)</h3>
+                    <p>Szybki skan podatności i weryfikacja aplikacji webowej.</p>
+                    <div class="price">99 PLN</div>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> Skan automatyczny + analiza manualna</li>
+                    <li><i class="fa-solid fa-check"></i> Podstawowe testy OWASP Top 10</li>
+                    <li><i class="fa-solid fa-check"></i> Raport z rekomendacjami poprawek</li>
+                    <li><i class="fa-solid fa-check"></i> Czas realizacji: 3 dni robocze</li>
+                </ul>
+                <button class="btn btn-outline" style="width: 100%;" onclick="addToCart('Audyt Podstawowy (Pruszków/Warszawa)', 99)">Wybierz pakiet</button>
+            </div>
+
+            <!-- Pakiet 2 (Featured) -->
+            <div class="package-card featured">
+                <div class="package-header">
+                    <h3>Pentest Web & API</h3>
+                    <p>Pełny manualny audyt bezpieczeństwa aplikacji i interfejsów API.</p>
+                    <div class="price">149 PLN</div>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> Zaawansowany Black Box / Grey Box</li>
+                    <li><i class="fa-solid fa-check"></i> Ominięcie logowania, podatności logiczne</li>
+                    <li><i class="fa-solid fa-check"></i> Retest po załataniu błędów w cenie</li>
+                    <li><i class="fa-solid fa-check"></i> Czas realizacji: 7 dni roboczych</li>
+                </ul>
+                <button class="btn btn-primary" style="width: 100%;" onclick="addToCart('Pentest Web & API', 149)">Wybierz pakiet</button>
+            </div>
+
+            <!-- Pakiet 3 -->
+            <div class="package-card">
+                <div class="package-header">
+                    <h3>Audyt Infrastruktury / Serwera</h3>
+                    <p>Testy bezpieczeństwa serwerów VPS, usług sieciowych i konfiguracji.</p>
+                    <div class="price">129 PLN</div>
+                </div>
+                <ul class="features-list">
+                    <li><i class="fa-solid fa-check"></i> Analiza portów i otwartych usług</li>
+                    <li><i class="fa-solid fa-check"></i> Testy konfiguracji systemów Linux/Windows</li>
+                    <li><i class="fa-solid fa-check"></i> Weryfikacja kont i uprawnień</li>
+                    <li><i class="fa-solid fa-check"></i> Czas realizacji: 5 dni roboczych</li>
+                </ul>
+                <button class="btn btn-outline" style="width: 100%;" onclick="addToCart('Audyt Infrastruktury / Serwera', 129)">Wybierz pakiet</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONFIGURATOR SECTION -->
+    <section class="container" id="konfigurator">
+        <h2 class="section-title">Konfigurator <span>Na Żywo</span></h2>
+        <div class="configurator-wrapper">
+            <div class="config-grid">
+                <div>
+                    <div class="config-section">
+                        <label>1. Wybierz obiekt testów (Pruszków / Warszawa):</label>
+                        <div class="config-options" id="targetType">
+                            <div class="option-btn active" onclick="selectOption(this, 'target', 79)">Aplikacja Web</div>
+                            <div class="option-btn" onclick="selectOption(this, 'target', 89)">API / Backend</div>
+                            <div class="option-btn" onclick="selectOption(this, 'target', 99)">Serwer / VPS</div>
+                            <div class="option-btn" onclick="selectOption(this, 'target', 109)">Aplikacja Mobilna</div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <label>2. Metodyka testów:</label>
+                        <div class="config-options" id="methodType">
+                            <div class="option-btn active" onclick="selectOption(this, 'method', 0)">Black Box (Bez wiedzy)</div>
+                            <div class="option-btn" onclick="selectOption(this, 'method', 20)">Grey Box (Częściowa wiedza)</div>
+                            <div class="option-btn" onclick="selectOption(this, 'method', 40)">White Box (Pełny kod źródłowy)</div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <label>3. Szybkość realizacji:</label>
+                        <div class="config-options" id="speedType">
+                            <div class="option-btn active" onclick="selectOption(this, 'speed', 0)">Standard (7 dni)</div>
+                            <div class="option-btn" onclick="selectOption(this, 'speed', 30)">Ekspres (3 dni)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <div>
+                        <h3>Szacowany Koszt</h3>
+                        <div class="summary-total" id="configPrice">79 PLN</div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Cena ostateczna dla klienta prywatnego. Brak dodatkowych podatków i ukrytych kosztów.</p>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 2rem;" onclick="addConfigToCart()">Dodaj do koszyka</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CART DRAWER -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3>Twój Koszyk</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItemsContainer">
+            <!-- Dynamic items -->
+        </div>
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 1.5rem; font-size: 1.2rem;">
+                <span>Razem:</span>
+                <span id="cartTotalPrice" style="color: var(--neon-green);">0 PLN</span>
+            </div>
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="openCheckout()">Przejdź do kasy</button>
+        </div>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal">
+            <h2 style="margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace;">Finalizacja <span>Zlecenia</span></h2>
+            <form id="orderForm" onsubmit="submitOrder(event)">
+                <div class="form-group">
+                    <label>Twój adres e-mail (do wysłania raportu i kontaktu)</label>
+                    <input type="email" class="form-control" required placeholder="np. anonim@proton.me">
+                </div>
+                <div class="form-group">
+                    <label>Zakres testów (Adres URL, IP lub nazwa systemu w regionie Pruszków/Warszawa)</label>
+                    <input type="text" class="form-control" required placeholder="np. https://mojadomena.pl lub IP: 192.168.1.50">
+                </div>
+                
+                <label style="margin-bottom: 0.5rem; display: block; color: var(--text-muted); font-size: 0.9rem;">Wybierz metodę płatności:</label>
+                <div class="payment-methods">
+                    <div class="payment-card active" onclick="selectPayment(this, 'paypal')">
+                        <i class="fa-brands fa-paypal" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                        <div>PayPal</div>
+                    </div>
+                    <div class="payment-card" onclick="selectPayment(this, 'monero')">
+                        <i class="fa-solid fa-coins" style="font-size: 1.5rem; margin-bottom: 5px;"></i>
+                        <div>Monero (XMR)</div>
+                    </div>
+                </div>
+
+                <div class="crypto-box" id="cryptoBox">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">Wyślij dokładną równowartość na adres portfela XMR:</p>
+                    <code style="font-size: 0.8rem; color: var(--neon-green); word-break: break-all;">888tNkZrPN6JsEgekjMnSB9aV7XvP2c99j74Q7wQ3K887vU8k7...</code>
+                </div>
+
+                <div style="margin: 1.5rem 0; font-size: 0.85rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-shield-halved" style="color: var(--neon-blue);"></i> Gwarancja pełnej poufności NDA. Dane i logi z testów są automatycznie usuwane po 14 dniach od dostarczenia raportu.
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="closeCheckout()">Anuluj</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">Zamawiam i Płacę</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2026 SecOps. Prywatne Testy Penetracyjne (Pruszków i Warszawa). Wszystkie dane są bezpieczne i szyfrowane.</p>
+    </footer>
+
+    <script>
+        let cart = [];
+        let currentConfig = {
+            target: 79,
+            method: 0,
+            speed: 0,
+            title: "Konfigurowany Pentest (Pruszków/Warszawa)"
+        };
+
+        function toggleCart() {
+            document.getElementById('cartDrawer').classList.toggle('open');
+        }
+
+        function selectOption(element, category, price) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentConfig[category] = price;
+            updateConfigPrice();
+        }
+
+        function updateConfigPrice() {
+            const total = currentConfig.target + currentConfig.method + currentConfig.speed;
+            document.getElementById('configPrice').innerText = total.toLocaleString() + ' PLN';
+        }
+
+        function addToCart(title, price) {
+            cart.push({ title, price });
+            updateCartUI();
+            toggleCart();
+        }
+
+        function addConfigToCart() {
+            const total = currentConfig.target + currentConfig.method + currentConfig.speed;
+            cart.push({ title: currentConfig.title, price: total });
+            updateCartUI();
+            toggleCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cartItemsContainer');
+            const countBadge = document.getElementById('cartCount');
+            const totalPriceEl = document.getElementById('cartTotalPrice');
+
+            countBadge.innerText = cart.length;
+            container.innerHTML = '';
+            
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price;
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9rem;">${item.title}</div>
+                            <div style="color: var(--neon-blue); font-family: 'JetBrains Mono'; font-size: 0.85rem;">${item.price} PLN</div>
+                        </div>
+                        <button class="remove-item" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+
+            totalPriceEl.innerText = total.toLocaleString() + ' PLN';
+        }
+
+        function openCheckout() {
+            if (cart.length === 0) {
+                alert('Twój koszyk jest pusty!');
+                return;
+            }
+            toggleCart();
+            document.getElementById('checkoutModal').style.display = 'flex';
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        function selectPayment(element, method) {
+            document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+
+            const cryptoBox = document.getElementById('cryptoBox');
+            if (method === 'monero') {
+                cryptoBox.style.display = 'block';
+            } else {
+                cryptoBox.style.display = 'none';
+            }
+        }
+
+        function submitOrder(event) {
+            event.preventDefault();
+            const orderId = 'SECOPS-' + Math.floor(100000 + Math.random() * 900000);
+            alert(`Zlecenia zostało przyjęte! Numer referencyjny: ${orderId}. Instrukcje płatności oraz dalsze kroki zostały przesłane na podany adres e-mail.`);
+            cart = [];
+            updateCartUI();
+            closeCheckout();
+        }
+    </script>
+</body>
+</html>
